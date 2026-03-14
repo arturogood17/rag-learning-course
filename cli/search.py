@@ -1,13 +1,13 @@
-import json, os
-from pathlib import Path
+import json
+from movies_path import *
 
-def search(query: str) -> list[dict]:
-    file = os.path.join(Path.cwd(), "data/movies.json")
-    print(file)
+def search(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
     with open(file) as f:
         data = json.load(f)
     movies = []
     for x in data["movies"]:
-        if query in x["title"]:
+        if query.lower() in x["title"].lower():
             movies.append(x)
+        if len(movies) >= DEFAULT_LIMIT:
+            break
     return movies

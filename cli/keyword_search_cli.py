@@ -2,11 +2,12 @@
 
 import argparse
 from search import search
+from movies_path import DEFAULT_LIMIT
 
 
-def pretty_printing_query_result(query: str, result: list[dict]):
+def pretty_printing_query_result(query: str, result: list[dict], limit: int):
     print("Searching for:", query)
-    for i in range(5):
+    for i in range(limit):
         print(f"{i + 1}. {result[i]["title"]}")
 
 
@@ -21,9 +22,8 @@ def main() -> None:
 
     match args.command:
         case "search":
-            print(f"Searching for: {args.query}") #Se hace así porque argparse convierte el add_argument("query") en un objeto
-            result = search(args.query)           #al que se puede acceder directamente
-            pretty_printing_query_result(args.query, result) 
+            result = search(args.query)                      #Se hace así porque argparse convierte el add_argument("query") en un objeto         
+            pretty_printing_query_result(args.query, result, DEFAULT_LIMIT) #al que se puede acceder directamente 
         case _:
             parser.print_help()
 
