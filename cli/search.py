@@ -2,18 +2,11 @@ import json, string
 from movies_path import *
 from nltk.stem import PorterStemmer
 
-def search(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
+def search_func(query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
     with open(file) as f:
         data = json.load(f)
     movies = []
-    processed_query = tokenization(text_processor(query))
-    for m in data["movies"]:
-        processed_title = text_processor(m["title"])
-        for token in processed_query:
-            if token in processed_title and not any(m["title"] == x["title"] for x in movies):
-                movies.append(m)
-        if len(movies) >= limit:
-            break
+    movies.extend(search(data, movies, query, limit))
     return movies
 
 
@@ -31,3 +24,14 @@ def tokenization(s: str) -> list[str]:
         if t not in list_sw:
             new_tokens.append(stemmer.stem(t))
     return new_tokens
+
+def search(data: dict, l: list, query: str, limit: int = DEFAULT_LIMIT) -> list[dict]:
+    processed_query = tokenization(text_processor(query))
+    for m in data["movies"]:
+        processed_title = text_processor(m["title"])
+        for token in processed_query:
+            if token in processed_title and not any(m["title"] == x["title"] for x in l):
+                l.append(m)
+        if len(l) >= limit:
+            break
+    return l
