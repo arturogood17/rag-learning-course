@@ -14,3 +14,5 @@ cache_index = os.path.join(parent, "cache", "index.pkl")
 
 cache_docmap = os.path.join(parent, "cache", "docmap.pkl")
 
+cache_term_frequency = os.path.join(parent, "cache", "term_frequencies.pkl")
+
