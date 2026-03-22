@@ -102,3 +102,8 @@ def search_helper(II: InvertedIndex, query: str, limit: int = DEFAULT_LIMIT) -> 
 def idf_func(term: str, II: InvertedIndex) -> float:
     p_term = tokenization(text_processor(term))[0]
     return math.log((len(II.docmap) + 1) / (len(II.index[p_term]) + 1))
+
+
+# TFIDF
+def tfidf(term: str, doc_id: int, II: InvertedIndex) -> float:
+    return II.get_tf(doc_id, term) * idf_func(term, II)

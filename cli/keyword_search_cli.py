@@ -23,8 +23,9 @@ def main() -> None:
     search_parser.add_argument("query", type=str, help="Search query")
     idf_suparser = subparsers.add_parser("idf", help="Helps calculate the idf of a term")
     idf_suparser.add_argument("term", type=str, help="The term that is going to be look up in the dataset")
-
-
+    tfidf_suparser = subparsers.add_parser("tfidf", help="Helps calculate the tfidf of a term")
+    tfidf_suparser.add_argument("doc_id", type=int, help="Document id")
+    tfidf_suparser.add_argument("term", type=str, help="The term that is going to be look up in the dataset")
 
     args = parser.parse_args()
 
@@ -43,6 +44,11 @@ def main() -> None:
         case "build":
             Inverted_Index_Search.build()
             Inverted_Index_Search.save()
+        
+        case "tfidf":
+            Inverted_Index_Search.load()
+            tf_idf = tfidf(args.term, args.doc_id, Inverted_Index_Search)
+            print(f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tf_idf:.2f}")
 
         case "idf":
             Inverted_Index_Search.load()
