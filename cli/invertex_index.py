@@ -33,6 +33,12 @@ class InvertedIndex:
         if len(token) > 1:
             raise Exception("Only one word is permitted")
         return self.term_frequencies[doc_id][token[0]]
+    
+    def get_bm25_idf(self, term: str) -> float:
+        tokenized = tokenization(text_processor(term))
+        if len(tokenized) != 1:
+            raise ValueError("One one word is supported")
+        return math.log((len(self.docmap) - len(self.index[tokenized[0]]) + 0.5) / (len(self.index[tokenized[0]]) + 0.5) + 1)
 
     
     def build(self):
@@ -107,3 +113,9 @@ def idf_func(term: str, II: InvertedIndex) -> float:
 # TFIDF
 def tfidf(term: str, doc_id: int, II: InvertedIndex) -> float:
     return II.get_tf(doc_id, term) * idf_func(term, II)
+
+
+# Test bm25_idf
+def bm25_idf_command(II: InvertedIndex, term: str) -> float:
+    II.load()
+    return II.get_bm25_idf(term)
