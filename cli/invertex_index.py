@@ -1,4 +1,4 @@
-from movies_path import file, cache_docmap, cache_index, cache_term_frequency
+from movies_path import *
 import pickle, math
 import json, os
 import string #, json
@@ -39,6 +39,10 @@ class InvertedIndex:
         if len(tokenized) != 1:
             raise ValueError("One one word is supported")
         return math.log((len(self.docmap) - len(self.index[tokenized[0]]) + 0.5) / (len(self.index[tokenized[0]]) + 0.5) + 1)
+    
+    def get_bm25_tf(self, doc_id, term, k1=BM25_k1) -> float:
+        tf = self.get_tf(doc_id, term)
+        return ((tf * (k1 + 1)) / (tf + k1))
 
     
     def build(self):

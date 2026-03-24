@@ -28,6 +28,10 @@ def main() -> None:
     tfidf_suparser.add_argument("term", type=str, help="The term that is going to be look up in the dataset")
     bm25_idf_suparser = subparsers.add_parser("bm25idf", help="Get BM25 IDF score for a given term")
     bm25_idf_suparser.add_argument("term", type=str, help="Term to get BM25 IDF score for")
+    bm25_tf_suparser = subparsers.add_parser("bm25tf", help="Get BM25 TF score for a given term")
+    bm25_tf_suparser.add_argument("doc_id", type=int, help="Doc id")
+    bm25_tf_suparser.add_argument("term", type=str, help="Term to get BM25 TF score for")
+    bm25_tf_suparser.add_argument("K1", type=float, nargs="?", default=BM25_k1, help="Tunable BM25 K1 parameter")
 
     args = parser.parse_args()
 
@@ -55,6 +59,11 @@ def main() -> None:
         case "bm25idf":
             bm25_idf = bm25_idf_command(Inverted_Index_Search, args.term)
             print(f"BM25 IDF score of '{args.term}': {bm25_idf:.2f}")
+        
+        case "bm25tf":
+            Inverted_Index_Search.load()
+            BM25_TF = Inverted_Index_Search.get_bm25_tf(args.doc_id, args.term, args.K1)
+            print(f"BM25 TF score of '{args.term}' in document '{args.doc_id}': {BM25_TF:.2f}")
             
         case "idf":
             Inverted_Index_Search.load()
