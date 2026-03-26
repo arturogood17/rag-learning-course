@@ -11,6 +11,7 @@ class InvertedIndex:
         self.index = {} # {str:set(list[str])}
         self.docmap = {} # {int:[str]}
         self.term_frequencies = {} #{ID: Counter (diccionario optimizado para contar objetos)}
+        self.doc_lengths = {}
 
     def __add_document(self, doc_id: int, text: str):
         token_text = tokenization(text_processor(text))
@@ -21,6 +22,15 @@ class InvertedIndex:
             self.index[t].add(doc_id) #No hay que asignar la operación self.index[t].add() a nada porque esta da como resultado None
                                       #Es decir, si haces self.index[t] =self.index[t].add(), self.index[t] va a ser None
                                       #Porque estás reasignando el valor en el diccionario
+            self.doc_lengths[doc_id] = len(token_text)
+
+    def __get_avg_doc_length(self) -> float:
+        if len(self.doc_lengths) == 0:
+            return 0.0
+        count = 0
+        for v in self.doc_lengths.values():
+            count += v
+        return count / len(self.doc_lengths)
 
     def get_documents(self, term: str) -> list[int]:
         lower_version = tokenization(text_processor(term))
@@ -40,10 +50,32 @@ class InvertedIndex:
             raise ValueError("One one word is supported")
         return math.log((len(self.docmap) - len(self.index[tokenized[0]]) + 0.5) / (len(self.index[tokenized[0]]) + 0.5) + 1)
     
-    def get_bm25_tf(self, doc_id, term, k1=BM25_k1) -> float:
+    def get_bm25_tf(self, doc_id, term, k1=BM25_k1, b=BM25_B) -> float:
         tf = self.get_tf(doc_id, term)
-        return ((tf * (k1 + 1)) / (tf + k1))
-
+        avg_doc_len = self.__get_avg_doc_length()
+        lenght_norm = 1 - b + b * (self.doc_lengths[doc_id] / avg_doc_len)
+        return ((tf * (k1 + 1)) / (tf + k1 * lenght_norm))
+    
+    def bm25(self, doc_id, term) -> float:
+        BM25TF = self.get_bm25_tf(doc_id, term)
+        BM25IDF = self.get_bm25_idf(term)
+        return BM25TF * BM25IDF
+    
+    def bm25_search(self, query: str, limit: int) -> dict[int,float]:
+        tok_query = tokenization(text_processor(query))
+        scores = {} # dict of ids to bm25 score
+        for t in tok_query:
+            ids = self.get_documents(t)
+            for id in ids:
+                bm25 = self.bm25(id, t)
+                if id not in scores:
+                    scores[id] = bm25
+                else:
+                    scores[id] += bm25
+        sorted_list = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+        if len(sorted_list) == 0:
+            return {}
+        return dict(sorted_list[:limit])
     
     def build(self):
         with open(file) as f:
@@ -66,6 +98,8 @@ class InvertedIndex:
             pickle.dump(self.index, ci)
         with open(cache_term_frequency, "wb") as ctf:
             pickle.dump(self.term_frequencies, ctf)
+        with open(cache_doc_lenghts, "wb") as df:
+            pickle.dump(self.doc_lengths, df)
 
 
     def load(self):
@@ -76,6 +110,8 @@ class InvertedIndex:
                 self.docmap = pickle.load(fc)
             with open(cache_term_frequency, 'rb') as ftf:
                 self.term_frequencies = pickle.load(ftf)
+            with open(cache_doc_lenghts, "rb") as df:
+                self.doc_lengths = pickle.load(df)
         except Exception as e:
             raise Exception("Ocurrió un error: ", e)
 

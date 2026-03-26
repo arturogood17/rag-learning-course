@@ -32,6 +32,12 @@ def main() -> None:
     bm25_tf_suparser.add_argument("doc_id", type=int, help="Doc id")
     bm25_tf_suparser.add_argument("term", type=str, help="Term to get BM25 TF score for")
     bm25_tf_suparser.add_argument("K1", type=float, nargs="?", default=BM25_k1, help="Tunable BM25 K1 parameter")
+    bm25_tf_suparser.add_argument("B", type=float, nargs="?", default=BM25_B, help="Tunable BM25 b parameter")
+    bm25search_suparser = subparsers.add_parser("bm25search", help="Get BM25 search docs for a given term")
+    bm25search_suparser.add_argument("query", type=str, help="Search query")
+    bm25search_suparser.add_argument("limit", type=int, nargs="?", default=5, help="Tunable limit of docs to be returned")
+
+
 
     args = parser.parse_args()
 
@@ -62,8 +68,17 @@ def main() -> None:
         
         case "bm25tf":
             Inverted_Index_Search.load()
-            BM25_TF = Inverted_Index_Search.get_bm25_tf(args.doc_id, args.term, args.K1)
+            BM25_TF = Inverted_Index_Search.get_bm25_tf(args.doc_id, args.term, args.K1, args.B)
             print(f"BM25 TF score of '{args.term}' in document '{args.doc_id}': {BM25_TF:.2f}")
+
+        case "bm25search":
+            Inverted_Index_Search.load()
+            dict_score = Inverted_Index_Search.bm25_search(args.query, args.limit)
+            index = 1
+            for k, v in dict_score.items():
+                title = Inverted_Index_Search.docmap[k]["title"]
+                print(f'{index}. ({k}) {title} - Score: {v:.2f}')
+                index += 1
             
         case "idf":
             Inverted_Index_Search.load()
