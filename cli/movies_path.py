@@ -16,5 +16,9 @@ cache_docmap = os.path.join(parent, "cache", "docmap.pkl")
 
 cache_term_frequency = os.path.join(parent, "cache", "term_frequencies.pkl")
 
+cache_doc_lenghts = os.path.join(parent, "data", "doc_lengths.pkl")
+
 BM25_k1 = 1.5
+
+BM25_B = 0.75
 
