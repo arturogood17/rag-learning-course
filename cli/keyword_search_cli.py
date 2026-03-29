@@ -37,8 +37,6 @@ def main() -> None:
     bm25search_suparser.add_argument("query", type=str, help="Search query")
     bm25search_suparser.add_argument("limit", type=int, nargs="?", default=5, help="Tunable limit of docs to be returned")
 
-
-
     args = parser.parse_args()
 
     Inverted_Index_Search = InvertedIndex()
