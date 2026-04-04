@@ -10,6 +10,8 @@ def main():
     embedding_suparser = subparsers.add_parser("embed_text", help="Embeds the given text")
     embedding_suparser.add_argument("text", type=str, help= "Text to be embedded")
     verify_embedding_suparser = subparsers.add_parser("verify_embeddings", help="Verify if movies.json was embedded correctly")
+    embedquery_suparser = subparsers.add_parser("embedquery", help="Embeds the given text")
+    embedquery_suparser.add_argument("query", type=str, help= "Text to be embedded")
     args = parser.parse_args()
 
     match args.command:
@@ -19,6 +21,8 @@ def main():
             embed_text(args.text)
         case "verify_embeddings":
             verify_embeddings()
+        case "embedquery":
+            embed_query_text(args.query)
         case _:
             parser.print_help()
 

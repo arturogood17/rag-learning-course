@@ -63,3 +63,10 @@ def verify_embeddings():
     print(f"Number of docs:   {len(movies["movies"])}")
     print(f"Embeddings shape: {embeddings.shape[0]} vectors in {embeddings.shape[1]} dimensions")
 
+def embed_query_text(query):
+    embedder = SemanticSearch()
+    query_emb = embedder.generate_embedding(query)
+    print(f"Query: {query}")
+    print(f"First 3 dimensions: {query_emb[:3]}")
+    print(f"Shape: {query_emb.shape}")
+
