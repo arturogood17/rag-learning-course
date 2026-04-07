@@ -10,7 +10,7 @@ class SemanticSearch:
        self.documents = None
        self.document_map = {}
 
-    def generate_embedding(self, text):
+    def generate_embedding(self, text) ->list[float]:
         if not text or not text.strip():
             raise ValueError("Texto vacío")
         return self.model.encode([text])[0]
@@ -38,6 +38,20 @@ class SemanticSearch:
             if len(self.embeddings) == len(self.documents):
                 return self.embeddings
         self.build_embeddings(documents)
+    
+    def search(self, query, limit):
+        if self.embeddings is None or len(self.embeddings) == 0:
+            raise ValueError("No embeddings loaded. Call `load_or_create_embeddings` first.")
+        query_vector = self.generate_embedding(query)
+        similarity_list = []
+        for i in range(len(self.embeddings)):
+            similarity = cosine_similarity(query_vector, self.embeddings[i])
+            similarity_list.append((similarity, self.documents[i]))
+        sorted_list = sorted(similarity_list, key= lambda x: x[0], reverse=True)
+        search_results = []
+        for i in range(limit):
+            search_results.append({"score": sorted_list[i][0], "title": sorted_list[i][1]['title'], "description": sorted_list[i][1]['description']})
+        return search_results
 
 
 def verify_model():
@@ -70,3 +84,24 @@ def embed_query_text(query):
     print(f"First 3 dimensions: {query_emb[:3]}")
     print(f"Shape: {query_emb.shape}")
 
+def cosine_similarity(vec1, vec2) -> float:
+    dot_product = np.dot(vec1, vec2)
+    norm1 = np.linalg.norm(vec1)
+    norm2 = np.linalg.norm(vec2)
+
+    if norm1 == 0 or norm2 == 0:
+        return 0.0
+
+    return dot_product / (norm1 * norm2)
+
+def search(query: str, limit: int):
+    embedder = SemanticSearch()
+    with open(file) as f:
+        movies = json.load(f)
+    embedder.load_or_create_embeddings(movies['movies'])
+    search_results = embedder.search(query, limit)
+    for i, v in enumerate(search_results):
+        print(f'{i+1}. {v["title"]} (score: {v["score"]})')
+        print()
+        print(v["description"])
+        print()
