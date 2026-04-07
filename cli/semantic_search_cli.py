@@ -12,6 +12,11 @@ def main():
     verify_embedding_suparser = subparsers.add_parser("verify_embeddings", help="Verify if movies.json was embedded correctly")
     embedquery_suparser = subparsers.add_parser("embedquery", help="Embeds the given text")
     embedquery_suparser.add_argument("query", type=str, help= "Text to be embedded")
+    search_suparser = subparsers.add_parser("search", help="Search semantically")
+    search_suparser.add_argument("query", type=str, help= "Query")
+    search_suparser.add_argument("--limit", type=int, nargs="?", default=5, help="Tunable limit of docs to be returned")
+
+
     args = parser.parse_args()
 
     match args.command:
@@ -23,6 +28,8 @@ def main():
             verify_embeddings()
         case "embedquery":
             embed_query_text(args.query)
+        case "search":
+            search(args.query, args.limit)
         case _:
             parser.print_help()
 
