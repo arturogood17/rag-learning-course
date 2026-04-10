@@ -18,6 +18,7 @@ def main():
     chunk_suparser = subparsers.add_parser("chunk", help="Chunks the text")
     chunk_suparser.add_argument("doc", type=str, help= "Text to be chunk")
     chunk_suparser.add_argument("--chunk-size", type=int, nargs="?", default=200, help="Size of each chunk")
+    chunk_suparser.add_argument("--overlap", type=int, nargs="?", default=0, help="Overlap of each chunk")
 
     args = parser.parse_args()
 
@@ -33,7 +34,7 @@ def main():
         case "search":
             search(args.query, args.limit)
         case "chunk":
-            chunk(args.doc, args.chunk_size)
+            chunk(args.doc, args.chunk_size, args.overlap)
         case _:
             parser.print_help()
 
