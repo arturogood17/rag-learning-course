@@ -15,7 +15,9 @@ def main():
     search_suparser = subparsers.add_parser("search", help="Search semantically")
     search_suparser.add_argument("query", type=str, help= "Query")
     search_suparser.add_argument("--limit", type=int, nargs="?", default=5, help="Tunable limit of docs to be returned")
-
+    chunk_suparser = subparsers.add_parser("chunk", help="Chunks the text")
+    chunk_suparser.add_argument("doc", type=str, help= "Text to be chunk")
+    chunk_suparser.add_argument("--chunk-size", type=int, nargs="?", default=200, help="Size of each chunk")
 
     args = parser.parse_args()
 
@@ -30,6 +32,8 @@ def main():
             embed_query_text(args.query)
         case "search":
             search(args.query, args.limit)
+        case "chunk":
+            chunk(args.doc, args.chunk_size)
         case _:
             parser.print_help()
 
