@@ -107,17 +107,26 @@ def search(query: str, limit: int):
         print()
 
 
-def chunk(doc: str, chunk_size: int):
+def chunk(doc: str, chunk_size: int, overlap: int):
     split_doc = doc.split()
-    buffer_doc = []
     chunks = []
     n = 0
+    i = 0
     while True:
+      buffer_doc = []
       if n >= len(split_doc):
         break
-      buffer_doc = split_doc[n:chunk_size+n]
-      chunks.append(buffer_doc)
+      if len(chunks) == 0:
+        buffer_doc = split_doc[n:chunk_size+n]
+        chunks.append(buffer_doc)
+        n += chunk_size
+        continue
+      if overlap > 0:
+        buffer_doc = chunks[i][-overlap:]
+      buffer_doc.extend(split_doc[n:chunk_size+n])
       n += chunk_size
+      i += 1
+      chunks.append(buffer_doc)
     chunk_printing(chunks, len(doc))
 
 
