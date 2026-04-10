@@ -105,3 +105,23 @@ def search(query: str, limit: int):
         print()
         print(v["description"])
         print()
+
+
+def chunk(doc: str, chunk_size: int):
+    split_doc = doc.split()
+    buffer_doc = []
+    chunks = []
+    n = 0
+    while True:
+      if n >= len(split_doc):
+        break
+      buffer_doc = split_doc[n:chunk_size+n]
+      chunks.append(buffer_doc)
+      n += chunk_size
+    chunk_printing(chunks, len(doc))
+
+
+def chunk_printing(chunks: list[list], total_len: int):
+    print(f"Chunking {total_len} characters")
+    for i, v in enumerate(chunks, 1):
+        print(f"{i}. {" ".join(v)}")
