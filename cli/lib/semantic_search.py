@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from movies_path import numpy_embeddings, file
-import os, json
+import os, json, re
 
 class SemanticSearch:
     def __init__(self):
@@ -110,23 +110,12 @@ def search(query: str, limit: int):
 def chunk(doc: str, chunk_size: int, overlap: int):
     split_doc = doc.split()
     chunks = []
-    n = 0
     i = 0
-    while True:
-      buffer_doc = []
-      if n >= len(split_doc):
+    while i < len(split_doc):
+      if len(split_doc[i:chunk_size+i]) <= overlap:
         break
-      if len(chunks) == 0:
-        buffer_doc = split_doc[n:chunk_size+n]
-        chunks.append(buffer_doc)
-        n += chunk_size
-        continue
-      if overlap > 0:
-        buffer_doc = chunks[i][-overlap:]
-      buffer_doc.extend(split_doc[n:chunk_size+n])
-      n += chunk_size
-      i += 1
-      chunks.append(buffer_doc)
+      chunks.append(split_doc[i:chunk_size+i])
+      i += chunk_size - overlap
     chunk_printing(chunks, len(doc))
 
 
@@ -134,3 +123,14 @@ def chunk_printing(chunks: list[list], total_len: int):
     print(f"Chunking {total_len} characters")
     for i, v in enumerate(chunks, 1):
         print(f"{i}. {" ".join(v)}")
+
+def semantic_chunk(text: str, max_size_chunk: int, overlap: int):
+    text_split = re.split(r'(?<=[.!?])\s+', text)
+    chunks = []
+    i = 0
+    while i < len(text_split):
+        if len(text_split[i:i+max_size_chunk]) <= overlap:
+            break
+        chunks.append(text_split[i:i+max_size_chunk])
+        i += max_size_chunk - overlap
+    chunk_printing(chunks, len(text))

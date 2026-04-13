@@ -19,6 +19,10 @@ def main():
     chunk_suparser.add_argument("doc", type=str, help= "Text to be chunk")
     chunk_suparser.add_argument("--chunk-size", type=int, nargs="?", default=200, help="Size of each chunk")
     chunk_suparser.add_argument("--overlap", type=int, nargs="?", default=0, help="Overlap of each chunk")
+    semantic_chunk_suparser = subparsers.add_parser("semantic_chunk", help="Creates chunks divided semantically")
+    semantic_chunk_suparser.add_argument("text", type=str, help= "Text to be chunk")
+    semantic_chunk_suparser.add_argument("--max-chunk-size", type=int, nargs="?", default=4, help="Size of each chunk")
+    semantic_chunk_suparser.add_argument("--overlap", type=int, nargs="?", default=0, help="Overlap of each chunk")
 
     args = parser.parse_args()
 
@@ -35,6 +39,8 @@ def main():
             search(args.query, args.limit)
         case "chunk":
             chunk(args.doc, args.chunk_size, args.overlap)
+        case "semantic_chunk":
+            semantic_chunk(args.text, args.max_chunk_size, args.overlap)
         case _:
             parser.print_help()
 
