@@ -2,6 +2,7 @@
 
 import argparse
 from lib.semantic_search import *
+from movies_path import file
 
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
@@ -23,6 +24,7 @@ def main():
     semantic_chunk_suparser.add_argument("text", type=str, help= "Text to be chunk")
     semantic_chunk_suparser.add_argument("--max-chunk-size", type=int, nargs="?", default=4, help="Size of each chunk")
     semantic_chunk_suparser.add_argument("--overlap", type=int, nargs="?", default=0, help="Overlap of each chunk")
+    embed_chunks_suparser = subparsers.add_parser("embed_chunks", help="Creates embeddings from chunks of a doc")
 
     args = parser.parse_args()
 
@@ -41,6 +43,12 @@ def main():
             chunk(args.doc, args.chunk_size, args.overlap)
         case "semantic_chunk":
             semantic_chunk(args.text, args.max_chunk_size, args.overlap)
+        case "embed_chunks":
+            with open(file, "r") as f:
+                movies = json.load(f)
+            chunkedSearchSemantic= ChunkedSemanticSearch()
+            embeddings = chunkedSearchSemantic.load_or_create_chunk_embeddings(movies['movies'])
+            print(f"Generated {len(embeddings)} chunked embeddings")
         case _:
             parser.print_help()
 
