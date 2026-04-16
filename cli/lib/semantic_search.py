@@ -181,18 +181,27 @@ def chunk(doc: str, chunk_size: int, overlap: int):
     chunk_printing(chunks, len(doc))
 
 
-def chunk_printing(chunks: list[list], total_len: int):
-    print(f"Chunking {total_len} characters")
+def chunk_printing(chunks: list[str], total_len: int):
+    # print(f"Chunking {total_len} characters")
     for i, v in enumerate(chunks, 1):
-        print(f"{i}. {" ".join(v)}")
+       print(f"{i}. {v}")
 
-def semantic_chunk(text: str, max_size_chunk: int, overlap: int) -> list[list]:
-    text_split = re.split(r'(?<=[.!?])\s+', text)
+def semantic_chunk(text: str, max_size_chunk: int, overlap: int):
+    text = text.strip()
     chunks = []
+    if not text:
+        chunk_printing([" "], 0)
+    text_split = re.split(r'(?<=[.!?])\s+', text)
+    if len(text_split) == 1 and not text_split[0].endswith(".") and not text_split[0].endswith("!") and not text_split[0].endswith("?"):
+        text = " ".join(text_split[0]).strip()
+        if len(text) > 0:
+            chunks.append(text)
     i = 0
     while i < len(text_split):
         if len(text_split[i:i+max_size_chunk]) <= overlap:
             break
-        chunks.append(" ".join(text_split[i:i+max_size_chunk]))
+        chunk = " ".join(text_split[i:i+max_size_chunk]).strip()
+        if len(chunk) > 0:
+            chunks.append(chunk)
         i += max_size_chunk - overlap
-    return chunks
+    chunk_printing(chunks, 0)
