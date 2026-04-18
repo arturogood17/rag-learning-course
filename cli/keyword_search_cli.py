@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse, math
-from invertex_index import *
+from cli.inverted_index import *
 
 
 
