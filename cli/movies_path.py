@@ -22,7 +22,7 @@ BM25_k1 = 1.5
 
 BM25_B = 0.75
 
-numpy_embeddings = cache_term_frequency = os.path.join(parent, "cache", "movie_embeddings.npy")
+numpy_embeddings = os.path.join(parent, "cache", "movie_embeddings.npy")
 
 chunk_embeddings = os.path.join(parent, "cache", "chunk_embeddings.npy")
 

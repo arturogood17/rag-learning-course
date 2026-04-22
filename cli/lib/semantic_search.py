@@ -39,7 +39,7 @@ class SemanticSearch:
                 return self.embeddings
         self.build_embeddings(documents)
     
-    def search(self, query, limit):
+    def search(self, query, limit) -> list[dict]:
         if self.embeddings is None or len(self.embeddings) == 0:
             raise ValueError("No embeddings loaded. Call `load_or_create_embeddings` first.")
         query_vector = self.generate_embedding(query)
@@ -47,10 +47,10 @@ class SemanticSearch:
         for i in range(len(self.embeddings)):
             similarity = cosine_similarity(query_vector, self.embeddings[i])
             similarity_list.append((similarity, self.documents[i]))
-        sorted_list = sorted(similarity_list, key= lambda x: x[0], reverse=True)
+        similarity_list.sort(key= lambda x: x[0], reverse=True)
         search_results = []
-        for i in range(limit):
-            search_results.append({"score": sorted_list[i][0], "title": sorted_list[i][1]['title'], "description": sorted_list[i][1]['description']})
+        for score, doc in similarity_list[:limit]:
+            search_results.append({"score": score, "title": doc['title'], "description": doc['description']})
         return search_results
     
 
@@ -66,6 +66,7 @@ class ChunkedSemanticSearch(SemanticSearch):
             self.document_map[doc['id']] = doc
         all_chunks = []
         chunks_metadata = []
+        semantic_chunks = []
         for index, doc in enumerate(self.documents):
             if doc['description'].strip():
                 semantic_chunks = semantic_chunk(doc['description'].strip(), 4, 1)
@@ -186,7 +187,7 @@ def chunk_printing(chunks: list[str], total_len: int):
     for i, v in enumerate(chunks, 1):
        print(f"{i}. {v}")
 
-def semantic_chunk(text: str, max_size_chunk: int, overlap: int):
+def semantic_chunk(text: str, max_size_chunk: int, overlap: int) -> list[str]:
     text = text.strip()
     chunks = []
     if not text:
@@ -204,4 +205,4 @@ def semantic_chunk(text: str, max_size_chunk: int, overlap: int):
         if len(chunk) > 0:
             chunks.append(chunk)
         i += max_size_chunk - overlap
-    chunk_printing(chunks, 0)
+    return chunks
