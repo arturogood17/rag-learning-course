@@ -3,6 +3,7 @@ import os
 from inverted_index import InvertedIndex
 from .semantic_search import ChunkedSemanticSearch
 from movies_path import file, cache_index
+from test_gemini import gemini_enhancer
 import json
 
 class HybridSearch:
@@ -121,7 +122,10 @@ def weighted_search_command(query: str, alpha: float, limit: int):
         print(f"         BM25: {r[1]['BM25']:.3f}, Semantic: {r[1]['SM']:.3f}")
         print(f"         {r[1]['document']['description'][:limit]}")
 
-def rrf_search_command(query: str, k: int, limit: int):
+def rrf_search_command(query: str, k: int, limit: int, enhance: str):
+    if enhance:
+        gemini_enhancer(query, enhance)
+        return
     with open(file, "r") as f:
         movies = json.load(f)
     hybrid_object = HybridSearch(movies["movies"])
