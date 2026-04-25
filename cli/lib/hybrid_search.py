@@ -67,24 +67,24 @@ class HybridSearch:
                 'BM25_rank': index,
                 'SM_rank': 0, 
             }
-        for index, val in enumerate(SM_results):
+        for index, val in enumerate(SM_results, 1):
             if val["id"] in rank_map:
                 rank_map[val["id"]]["SM_rank"] = index
             else:
                 rank_map[val["id"]] = {
                     'document': self.semantic_search.document_map[val["id"]],
                     'BM25_rank': 0,
-                    'SM_rank': index + 1,
+                    'SM_rank': index,
                 }
         for doc, val in rank_map.items():
             if val["BM25_rank"] > 0 and val["SM_rank"] > 0:
                 rrf_score =  (1/(k + val["BM25_rank"])) + (1/(k + val["SM_rank"]))
                 rank_map[doc]["rrf_score"] = rrf_score
-            if val["BM25_rank"] == 0 and val["SM_rank"] >= 0:
-                rrf_score =  1/(k + val["BM25_rank"])
-                rank_map[doc]["rrf_score"] = rrf_score
-            if val["BM25_rank"] >= 0 and val["SM_rank"] == 0:
+            elif val["BM25_rank"] == 0 and val["SM_rank"] >= 0:
                 rrf_score =  1/(k + val["SM_rank"])
+                rank_map[doc]["rrf_score"] = rrf_score
+            elif val["BM25_rank"] >= 0 and val["SM_rank"] == 0:
+                rrf_score =  1/(k + val["BM25_rank"])
                 rank_map[doc]["rrf_score"] = rrf_score
         
         results = sorted(rank_map.items(), key= lambda x: x[1]["rrf_score"], reverse=True)
@@ -124,8 +124,7 @@ def weighted_search_command(query: str, alpha: float, limit: int):
 
 def rrf_search_command(query: str, k: int, limit: int, enhance: str):
     if enhance:
-        gemini_enhancer(query, enhance)
-        return
+        query = gemini_enhancer(query, enhance)
     with open(file, "r") as f:
         movies = json.load(f)
     hybrid_object = HybridSearch(movies["movies"])
