@@ -38,7 +38,30 @@ Output only the rewritten query text, nothing else.
 
 User query: "{query}"
 """
+        case "expand":
+            enhanced_prompt = f"""Expand the user-provided movie search query below with related terms.
+
+Add synonyms and related concepts that might appear in movie descriptions.
+Keep expansions relevant and focused.
+Output only the additional terms; they will be appended to the original query.
+
+Examples:
+- "scary bear movie" -> "scary horror grizzly bear movie terrifying film"
+- "action movie with bear" -> "action thriller bear chase fight adventure"
+- "comedy with bear" -> "comedy funny bear humor lighthearted"
+
+User query: "{query}"
+"""
     response = client.models.generate_content(model= 'gemma-3-27b-it',
                                               contents = enhanced_prompt)
-    
-    print(f"Enhanced query ({method}): '{query}' -> '{response.text}'\n")
+    match method:
+        case "spell":
+            print(f"Enhanced query ({method}): '{query}' -> '{response.text}'\n")
+            return response.text
+        case "rewrite":
+            print(f"Enhanced query ({method}): '{query}' -> '{response.text}'\n")
+            return response.text
+        case "expand":
+            enhanced_query = query + " " + response.text
+            print(f"Enhanced query ({method}): '{query}' -> '{enhanced_query}'\n")
+            return enhanced_query
