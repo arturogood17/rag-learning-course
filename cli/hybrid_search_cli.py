@@ -16,7 +16,7 @@ def main() -> None:
     rrf_search_subparser.add_argument("-k", type=int, default=60, help= "Configurable k parameter that affects weight of the ranks")
     rrf_search_subparser.add_argument("--limit", type=int, default=5, help= "Limit of results")
     rrf_search_subparser.add_argument("--enhance", type=str, choices=["spell", "rewrite", "expand"], help= "Query enhancement method")
-    
+    rrf_search_subparser.add_argument("--rerank-method", type=str, choices = ["individual"], help= "Reranking of results")
     
 
     args = parser.parse_args()
@@ -27,7 +27,7 @@ def main() -> None:
         case "weighted-search":
             weighted_search_command(args.query, args.alpha, args.limit)
         case "rrf-search":
-            rrf_search_command(args.query, args.k, args.limit, args.enhance)
+            rrf_search_command(args.query, args.k, args.limit, args.enhance, args.rerank_method)
         case _:
             parser.print_help()
 
