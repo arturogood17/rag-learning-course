@@ -4,7 +4,7 @@ from inverted_index import InvertedIndex
 from .semantic_search import ChunkedSemanticSearch
 from movies_path import file, cache_index
 from test_gemini import gemini_enhancer
-import json
+import json, time
 
 class HybridSearch:
     def __init__(self, documents):
@@ -56,8 +56,8 @@ class HybridSearch:
         sorted_results = sorted(id_to_doc_scores_map.items(), key = lambda x: x[1]["hybrid_score"], reverse=True)
         return sorted_results[:limit]
 
-    def rrf_search(self, query, k, limit):
-        BM25_results, SM_results = results_getter(self, query, limit)
+    def rrf_search(self, query, k, limit, rerank: str):
+        BM25_results, SM_results = results_getter(self, query, limit, rerank)
         BM25_results = sorted(BM25_results.items(), key = lambda x: x[1], reverse=True)
         SM_results.sort(key= lambda x: x['score'], reverse = True)
         rank_map =  {}
@@ -116,28 +116,41 @@ def weighted_search_command(query: str, alpha: float, limit: int):
     hybrid_object = HybridSearch(movies["movies"])
     hybrid_object.semantic_search.load_or_create_embeddings(movies["movies"])
     results = hybrid_object.weighted_search(query, alpha, limit)
+
     for index, r in enumerate(results, 1):
         print(f"{index}. {r[1]['document']['title']}")
         print(f"         Hybrid Score: {r[1]['hybrid_score']:.3f}")
         print(f"         BM25: {r[1]['BM25']:.3f}, Semantic: {r[1]['SM']:.3f}")
         print(f"         {r[1]['document']['description'][:limit]}")
 
-def rrf_search_command(query: str, k: int, limit: int, enhance: str):
+def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str):
     if enhance:
-        query = gemini_enhancer(query, enhance)
+        query = gemini_enhancer(query, enhance, "")
     with open(file, "r") as f:
         movies = json.load(f)
     hybrid_object = HybridSearch(movies["movies"])
-    results = hybrid_object.rrf_search(query, k, limit)
-    for index , result in enumerate(results, 1):
+    results = hybrid_object.rrf_search(query, k, limit, rerank)
+    for index, r in enumerate(results, 1):
+        new_rank = gemini_enhancer(query, rerank, r[1]["document"])
+        r[1]["rerank"] = int(new_rank)
+        time.sleep(3)
+    results = sorted(results, key= lambda x: x[1]["rerank"], reverse=True)
+    print(f"Re-ranking top {limit} results using individual method...")
+    print(f"Reciprocal Rank Fusion Results for '{query}' (k=60)")
+    for index , result in enumerate(results[:limit], 1):
         print(f"{index}. {result[1]['document']['title']}")
+        print(f"         Re-rank Score: {result[1]['rerank']:.3f}/10")
         print(f"         RRF Score: {result[1]['rrf_score']:.3f}")
-        print(f"         BM25: {result[1]['BM25_rank']}, Semantic: {result[1]['SM_rank']}")
-        print(f"         {result[1]['document']['description'][:limit]}")
+        print(f"         BM25 rank: {result[1]['BM25_rank']}, Semantic rank: {result[1]['SM_rank']}")
+        print(f"         {result[1]['document']['description'][:100]}...")
 
 
 
-def results_getter(h: HybridSearch, query: str, limit: int):
-    BM25_results = h._bm25_search(query, limit * 500)
-    SM_results = h.semantic_search.search_chunks(query, limit * 500)
+def results_getter(h: HybridSearch, query: str, limit: int, rerank: str):
+    if rerank:
+        BM25_results = h._bm25_search(query, limit * 5)
+        SM_results = h.semantic_search.search_chunks(query, limit * 5)
+    else:
+        BM25_results = h._bm25_search(query, limit * 500)
+        SM_results = h.semantic_search.search_chunks(query, limit * 500)
     return BM25_results, SM_results

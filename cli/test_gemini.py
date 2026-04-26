@@ -3,12 +3,13 @@ from dotenv import load_dotenv
 from google import genai
 
 
-def gemini_enhancer(query: str, method: str):
+def gemini_enhancer(query: str, method: str, doc: dict):
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY environment variable not set")
     client = genai.Client(api_key= api_key)
+    enhanced_prompt = ""
     match method:
         case "spell":
             enhanced_prompt = f"""Fix any spelling errors in the user-provided movie search query below.
@@ -52,6 +53,21 @@ Examples:
 
 User query: "{query}"
 """
+        case "individual":
+            enhanced_prompt = f"""Rate how well this movie matches the search query.
+
+Query: "{query}"
+Movie: {doc.get("title", "")} - {doc.get("document", "")}
+
+Consider:
+- Direct relevance to query
+- User intent (what they're looking for)
+- Content appropriateness
+
+Rate 0-10 (10 = perfect match).
+Output ONLY the number in your response, no other text or explanation.
+
+Score:"""
     response = client.models.generate_content(model= 'gemma-3-27b-it',
                                               contents = enhanced_prompt)
     match method:
@@ -65,3 +81,5 @@ User query: "{query}"
             enhanced_query = query + " " + response.text
             print(f"Enhanced query ({method}): '{query}' -> '{enhanced_query}'\n")
             return enhanced_query
+        case "individual":
+            return response.text.strip()
