@@ -22,7 +22,7 @@ class HybridSearch:
         return self.idx.bm25_search(query, limit)
 
     def weighted_search(self, query, alpha, limit):
-        BM25_results, SM_results = results_getter(self, query, limit)
+        BM25_results, SM_results = results_getter(self, query, limit, "")
         BM25_normalization = []
         SM_normalization= []
         [BM25_normalization.append(v) for _,v in BM25_results.items()]
@@ -130,16 +130,24 @@ def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str
         movies = json.load(f)
     hybrid_object = HybridSearch(movies["movies"])
     results = hybrid_object.rrf_search(query, k, limit, rerank)
-    for index, r in enumerate(results, 1):
-        new_rank = gemini_enhancer(query, rerank, r[1]["document"])
-        r[1]["rerank"] = int(new_rank)
-        time.sleep(3)
-    results = sorted(results, key= lambda x: x[1]["rerank"], reverse=True)
     print(f"Re-ranking top {limit} results using individual method...")
     print(f"Reciprocal Rank Fusion Results for '{query}' (k=60)")
+    match rerank:
+        case "individual":
+            for index, r in enumerate(results, 1):
+                new_rank = gemini_enhancer(query, rerank, r[1]["document"])
+                r[1]["rerank"] = int(new_rank)
+                time.sleep(3)
+            results = sorted(results, key= lambda x: x[1]["rerank"], reverse=True)
+        case "batch":
+            new_ranks = json.loads(gemini_enhancer(query, rerank, results))
+            for result in results:
+                result[1]["rerank"] = new_ranks.index(result[0]) + 1
+            results = sorted(results, key= lambda x: x[1]["rerank"])
+    
     for index , result in enumerate(results[:limit], 1):
         print(f"{index}. {result[1]['document']['title']}")
-        print(f"         Re-rank Score: {result[1]['rerank']:.3f}/10")
+        print(f"         Re-rank Score: {result[1]['rerank']}")
         print(f"         RRF Score: {result[1]['rrf_score']:.3f}")
         print(f"         BM25 rank: {result[1]['BM25_rank']}, Semantic rank: {result[1]['SM_rank']}")
         print(f"         {result[1]['document']['description'][:100]}...")

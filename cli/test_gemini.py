@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from google import genai
 
 
-def gemini_enhancer(query: str, method: str, doc: dict):
+def gemini_enhancer(query: str, method: str, doc: any):
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -68,6 +68,20 @@ Rate 0-10 (10 = perfect match).
 Output ONLY the number in your response, no other text or explanation.
 
 Score:"""
+        case "batch":
+            enhanced_prompt = f"""Rank the movies listed below by relevance to the following search query.
+
+Query: "{query}"
+
+Movies:
+{doc}
+
+Return ONLY the movie IDs in order of relevance (best match first). Return a valid JSON list, nothing else.
+
+For example:
+[75, 12, 34, 2, 1]
+
+Ranking:"""
     response = client.models.generate_content(model= 'gemma-3-27b-it',
                                               contents = enhanced_prompt)
     match method:
@@ -83,3 +97,5 @@ Score:"""
             return enhanced_query
         case "individual":
             return response.text.strip()
+        case "batch":
+            return response.text
