@@ -4,6 +4,7 @@ from inverted_index import InvertedIndex
 from .semantic_search import ChunkedSemanticSearch
 from movies_path import file, cache_index
 from test_gemini import gemini_enhancer
+from sentence_transformers import CrossEncoder
 import json, time
 
 class HybridSearch:
@@ -144,10 +145,20 @@ def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str
             for result in results:
                 result[1]["rerank"] = new_ranks.index(result[0]) + 1
             results = sorted(results, key= lambda x: x[1]["rerank"])
+        case "cross_encoder":
+            cross_encoder = CrossEncoder("cross-encoder/ms-marco-TinyBERT-L2-v2")
+            pairs = []
+            for r in results:
+                pairs.append([query, f"{r[1]["document"]["title"]} - {r[1]["document"]["description"]}"])
+            scores = cross_encoder.predict(pairs)
+            for index, r in enumerate(results):
+                r[1]["cross_encoder_score"] = scores[index]
+            results = sorted(results, key= lambda x: x[1]["cross_encoder_score"], reverse=True)
+            
     
     for index , result in enumerate(results[:limit], 1):
         print(f"{index}. {result[1]['document']['title']}")
-        print(f"         Re-rank Score: {result[1]['rerank']}")
+        print(f"         Cross Encoder Score: {result[1]['cross_encoder_score']:.3f}")
         print(f"         RRF Score: {result[1]['rrf_score']:.3f}")
         print(f"         BM25 rank: {result[1]['BM25_rank']}, Semantic rank: {result[1]['SM_rank']}")
         print(f"         {result[1]['document']['description'][:100]}...")
