@@ -1,6 +1,6 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
-from movies_path import numpy_embeddings, file, chunk_embeddings, chunk_metadata
+from cli.utils import numpy_embeddings, file, chunk_embeddings, chunk_metadata
 import os, json, re
 
 class SemanticSearch:

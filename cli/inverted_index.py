@@ -1,8 +1,8 @@
-from movies_path import *
+from cli.utils import *
 import pickle, math
 import json, os
 import string #, json
-from movies_path import *
+from cli.utils import *
 import collections
 from nltk.stem import PorterStemmer
 

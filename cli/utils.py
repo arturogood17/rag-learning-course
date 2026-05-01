@@ -1,4 +1,4 @@
-import os
+import os, json
 from pathlib import Path
 
 
@@ -27,3 +27,10 @@ numpy_embeddings = os.path.join(parent, "cache", "movie_embeddings.npy")
 chunk_embeddings = os.path.join(parent, "cache", "chunk_embeddings.npy")
 
 chunk_metadata = os.path.join(parent, "cache", "chunk_metadata.json")
+
+golden_dataset_path = os.path.join(parent, "data", "golden_dataset.json")
+
+def load_file_json(path: str) -> any:
+    with open(path) as f:
+        file = json.load(f)
+    return file

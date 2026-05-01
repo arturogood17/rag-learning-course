@@ -2,7 +2,7 @@
 
 import argparse
 from lib.semantic_search import *
-from movies_path import file
+from cli.utils import file
 
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
