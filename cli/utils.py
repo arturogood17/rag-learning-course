@@ -1,6 +1,7 @@
 import os, json
 from pathlib import Path
 
+K_VALUE = 60
 
 DEFAULT_LIMIT = 5
 
