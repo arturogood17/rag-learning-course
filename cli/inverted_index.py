@@ -1,8 +1,7 @@
-from cli.utils import *
+from utils import *
 import pickle, math
 import json, os
-import string #, json
-from cli.utils import *
+import string
 import collections
 from nltk.stem import PorterStemmer
 

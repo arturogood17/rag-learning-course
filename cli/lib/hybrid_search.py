@@ -2,7 +2,7 @@ import os
 
 from inverted_index import InvertedIndex
 from .semantic_search import ChunkedSemanticSearch
-from cli.utils import file, cache_index
+from utils import file, cache_index
 from test_gemini import gemini_enhancer
 from sentence_transformers import CrossEncoder
 import json, time
