@@ -27,9 +27,11 @@ def main():
             if r in test["relevant_docs"]:
                 count += 1
         precision = count / len(retrieved)
+        recall = count / len(test["relevant_docs"])
         print(f"k={limit}")
         print(f"- Query: {test["query"]}")
         print(f"  - Precision@{limit}: {precision:.4f}")
+        print(f"  - Recall@{limit}: {recall:.4f}")
         print(f"  - Retrieved: {", ".join(retrieved)}")
         print(f"  - Relevant: {", ".join(test["relevant_docs"])}")
         print()
