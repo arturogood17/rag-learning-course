@@ -123,7 +123,7 @@ def weighted_search_command(query: str, alpha: float, limit: int):
         print(f"         BM25: {r[1]['BM25']:.3f}, Semantic: {r[1]['SM']:.3f}")
         print(f"         {r[1]['document']['description'][:limit]}")
 
-def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str):
+def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str, evaluate: bool):
     if enhance:
         query = gemini_enhancer(query, enhance, "")
     with open(file, "r") as f:
@@ -159,11 +159,18 @@ def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str
     
     for index , result in enumerate(results[:limit], 1):
         print(f"{index}. {result[1]['document']['title']}")
-        print(f"         Cross Encoder Score: {result[1]['cross_encoder_score']:.3f}")
+        if 'cross_encoder_score' in result[1]:
+            print(f"         Cross Encoder Score: {result[1]['cross_encoder_score']:.3f}")
         print(f"         RRF Score: {result[1]['rrf_score']:.3f}")
         print(f"         BM25 rank: {result[1]['BM25_rank']}, Semantic rank: {result[1]['SM_rank']}")
         print(f"         {result[1]['document']['description'][:100]}...")
-
+    
+    print()
+    if evaluate:
+        to_evaluate = [ x[1]["document"]["title"] for x in results[:limit]]
+        new_ranks = json.loads(gemini_enhancer(query, "evaluate", to_evaluate))
+        for index, r in enumerate(to_evaluate, 1):
+            print(f"{index}. {r}: {new_ranks[index - 1]}/3")
 
 
 def results_getter(h: HybridSearch, query: str, limit: int, rerank: str):
