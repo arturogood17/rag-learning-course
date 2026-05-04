@@ -82,6 +82,25 @@ For example:
 [75, 12, 34, 2, 1]
 
 Ranking:"""
+        case "evaluate":
+            enhanced_prompt = f"""Rate how relevant each result is to this query on a 0-3 scale:
+
+Query: "{query}"
+
+Results:
+{chr(10).join(doc)}
+
+Scale:
+- 3: Highly relevant
+- 2: Relevant
+- 1: Marginally relevant
+- 0: Not relevant
+
+Do NOT give any numbers other than 0, 1, 2, or 3.
+
+Return ONLY the scores in the same order you were given the documents. Return a valid JSON list, nothing else. For example:
+
+[2, 0, 3, 2, 0, 1]"""
     response = client.models.generate_content(model= 'gemma-3-27b-it',
                                               contents = enhanced_prompt)
     match method:
@@ -98,4 +117,6 @@ Ranking:"""
         case "individual":
             return response.text.strip()
         case "batch":
+            return response.text
+        case "evaluate":
             return response.text
