@@ -89,7 +89,6 @@ class HybridSearch:
                 rank_map[doc]["rrf_score"] = rrf_score
         
         results = sorted(rank_map.items(), key= lambda x: x[1]["rrf_score"], reverse=True)
-
         return results[:limit]
 
 def normalize_command(l: list[float]) -> list[float]:
@@ -140,6 +139,9 @@ def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str
                 r[1]["rerank"] = int(new_rank)
                 time.sleep(3)
             results = sorted(results, key= lambda x: x[1]["rerank"], reverse=True)
+            for r in results:
+                print(r)
+                break
         case "batch":
             new_ranks = json.loads(gemini_enhancer(query, rerank, results))
             for result in results:
@@ -153,8 +155,7 @@ def rrf_search_command(query: str, k: int, limit: int, enhance: str, rerank: str
             scores = cross_encoder.predict(pairs)
             for index, r in enumerate(results):
                 r[1]["cross_encoder_score"] = scores[index]
-            results = sorted(results, key= lambda x: x[1]["cross_encoder_score"], reverse=True)
-            
+            results = sorted(results, key= lambda x: x[1]["cross_encoder_score"], reverse=True)      
     
     for index , result in enumerate(results[:limit], 1):
         print(f"{index}. {result[1]['document']['title']}")
