@@ -145,6 +145,21 @@ Instructions:
 - Be direct and informative
 
 Answer:"""
+        case "question":
+            enhanced_prompt = f"""Answer the user's question based on the provided movies that are available on Hoopla, a streaming service.
+
+Question: {query}
+
+Documents:
+{doc}
+
+Instructions:
+- Answer questions directly and concisely
+- Be casual and conversational
+- Don't be cringe or hype-y
+- Talk like a normal person would in a chat conversation
+
+Answer:"""
     response = client.models.generate_content(model= 'gemma-4-31b-it',
                                               contents = enhanced_prompt)
     
@@ -170,4 +185,6 @@ Answer:"""
         case "summarize":
             return response.text.strip()
         case "citations":
+            return response.text.strip()
+        case "question":
             return response.text.strip()
