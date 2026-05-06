@@ -112,8 +112,23 @@ Documents:
 {doc}
 
 Answer:"""
-    response = client.models.generate_content(model= 'gemma-3-27b-it',
+        case "summarize":
+            enhanced_prompt = f"""Provide information useful to the query below by synthesizing data from multiple search results in detail.
+
+The goal is to provide comprehensive information so that users know what their options are.
+Your response should be information-dense and concise, with several key pieces of information about the genre, plot, etc. of each movie.
+
+This should be tailored to Hoopla users. Hoopla is a movie streaming service.
+
+Query: {query}
+
+Search results:
+{doc}
+
+Provide a comprehensive 3–4 sentence answer that combines information from multiple sources:"""
+    response = client.models.generate_content(model= 'gemma-4-31b-it',
                                               contents = enhanced_prompt)
+    
     match method:
         case "spell":
             print(f"Enhanced query ({method}): '{query}' -> '{response.text}'\n")
@@ -132,4 +147,6 @@ Answer:"""
         case "evaluate":
             return response.text
         case "RAG":
+            return response.text.strip()
+        case "summarize":
             return response.text.strip()

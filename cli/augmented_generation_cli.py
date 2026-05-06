@@ -11,6 +11,11 @@ def main():
         "rag", help="Perform RAG (search + generate answer)"
     )
     rag_parser.add_argument("query", type=str, help="Search query for RAG")
+    summarize_parser = subparsers.add_parser(
+        "summarize", help="Summarizes the results returned by the Hybrid Search Class"
+    )
+    summarize_parser.add_argument("query", type=str, help="Search query")
+    summarize_parser.add_argument("--limit", type=int, default=5, help="Limit of results")
 
     args = parser.parse_args()
 
@@ -27,6 +32,18 @@ def main():
             print()
             print("RAG Response:")
             print(rag_response)
+        case "summarize":
+            query = args.query
+            movies = load_file_json(file)
+            hb = HybridSearch(movies["movies"])
+            results = hb.rrf_search(query, K_VALUE, args.limit, "")
+            summary = gemini_enhancer(query, "summarize", results)
+            print("Search Results")
+            for r in results:
+                print("-", r[1]["document"]["title"])
+            print()
+            print("LLM Summary:")
+            print(summary)
         case _:
             parser.print_help()
 
