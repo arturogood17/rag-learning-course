@@ -101,6 +101,17 @@ Do NOT give any numbers other than 0, 1, 2, or 3.
 Return ONLY the scores in the same order you were given the documents. Return a valid JSON list, nothing else. For example:
 
 [2, 0, 3, 2, 0, 1]"""
+        case "RAG":
+            enhanced_prompt = f"""You are a RAG agent for Hoopla, a movie streaming service.
+Your task is to provide a natural-language answer to the user's query based on documents retrieved during search.
+Provide a comprehensive answer that addresses the user's query.
+
+Query: {query}
+
+Documents:
+{doc}
+
+Answer:"""
     response = client.models.generate_content(model= 'gemma-3-27b-it',
                                               contents = enhanced_prompt)
     match method:
@@ -120,3 +131,5 @@ Return ONLY the scores in the same order you were given the documents. Return a 
             return response.text
         case "evaluate":
             return response.text
+        case "RAG":
+            return response.text.strip()
